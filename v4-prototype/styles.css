@@ -2509,10 +2509,21 @@ em { font-style: italic; color: var(--blue); }
 .whynow h2 {
   font-family: 'Fraunces', serif;
   font-weight: 900;
-  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
   color: var(--ink);
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.whynow h2 em { color: var(--blue); font-style: italic; }
+.whynow-body {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.15rem;
+  color: var(--ink-2);
+  line-height: 1.55;
+  max-width: 44em;
+  margin: 0 0 2rem;
 }
 .whynow-chips {
   list-style: none;
