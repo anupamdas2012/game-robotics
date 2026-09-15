@@ -6,11 +6,10 @@
   const section = document.querySelector('.features-morph');
   if (!section) return;
 
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (prefersReduced) {
-    section.classList.add('is-reduced');
-    return;
-  }
+  // Scroll-scrubbed morph disabled — features + robots now render statically
+  // stacked (same fallback path used for prefers-reduced-motion).
+  section.classList.add('is-reduced');
+  return;
 
   const swap = section.querySelector('.fm-swap');
   const eyebrow = section.querySelector('.fm-eyebrow');
