@@ -1632,6 +1632,14 @@ em { font-style: italic; color: var(--blue); }
   transform: none !important;
   pointer-events: auto !important;
 }
+/* When the scroll-driven crossfade is disabled, the per-card
+   opacity/transform (driven by --progress) still applies and would
+   hide the robots layer at progress=0. Reset both card sets. */
+.features-morph.is-reduced .fm-features .feature-card,
+.features-morph.is-reduced .fm-robots .feature-card {
+  opacity: 1 !important;
+  transform: none !important;
+}
 
 .fm-stage {
   position: sticky;
