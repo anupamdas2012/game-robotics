@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Robotics — Bring robots to life</title>
+  <meta name="description" content="A game engine for robotics — making modern AI and reinforcement learning accessible so you can create, train, and deploy intelligent robots into the real world." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%97%89%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="frame">
+    <!-- Prominent logo + status -->
+    <header class="topbar">
+      <div class="logo">
+        <span class="logo-badge">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="13" width="26" height="21" rx="5"/><circle cx="16" cy="24" r="3.4"/><circle cx="25" cy="24" r="3.4"/><line x1="20" y1="4" x2="20" y2="13"/><circle cx="20" cy="4" r="3"/></svg>
+        </span>
+        <span class="logo-text">GAME<br />ROBOTICS</span>
+      </div>
+      <span class="status-pill"><span class="blip"></span>EARLY ACCESS</span>
+    </header>
+
+    <!-- Hero -->
+    <main class="hero">
+      <div class="title-card">
+        <h1>Bring robots<br />to <em>life</em>.</h1>
+      </div>
+
+      <p class="blurb">
+        Create, train, and deploy intelligent robots into the real world using
+        <mark>agentic co-design</mark>. That's right! <strong>Robots creating <span class="teal">better</span> robots</strong>
+        to help you realize your ideas fast. <a href="#newsletter-email" class="go" onclick="event.preventDefault(); var i = document.getElementById('newsletter-email'); i.scrollIntoView({ behavior: 'smooth', block: 'center' }); i.focus();">Let's GO!</a>
+      </p>
+
+      <form class="signup" onsubmit="event.preventDefault(); this.hidden = true; document.getElementById('signup-success').hidden = false;">
+        <input id="newsletter-email" type="email" placeholder="you@workbench.dev" aria-label="Email address" required />
+        <button type="submit" class="btn">Join the newsletter <span aria-hidden="true">→</span></button>
+      </form>
+      <p id="signup-success" class="signup-success" hidden><span class="check">✓</span> You're on the list! We'll send updates as we build.</p>
+
+      <p class="footnote">No product yet — just a newsletter. We're early, and building in the open.</p>
+    </main>
+
+    <footer class="foot">© 2026 GAME ROBOTICS <span>◆</span> SIMULATION → REALITY</footer>
+  </div>
+</body>
+</html>
