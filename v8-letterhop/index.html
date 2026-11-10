@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Robot Engine — spring/PID hopper</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%97%89%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#FFFFFF; --grid:rgba(0,0,0,0.06); --ink:#0A0A0A; --teal:#0FB5A6; --yellow:#FFD23E; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, var(--grid) 1.5px, transparent 1.5px);
+      background-size: 46px 46px;
+      overflow: hidden;
+    }
+    #stage { position:fixed; inset:0; display:block; }
+    .rblurb {
+      position: fixed;
+      right: clamp(24px, 5vw, 80px);
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 300px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 32px;
+      line-height: 1.4;
+      color: var(--ink);
+      z-index: 3;
+      user-select: none;
+    }
+    .rblurb .cur {
+      display: inline-block;
+      width: 0.5ch;
+      background: var(--ink);
+      margin-left: 1px;
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .go-btn {
+      display: inline-block; margin-top: 18px;
+      background: var(--ink); border-radius: 16px;
+      padding: 0.42em 0.82em;
+      font-size: 1.7rem; font-weight: 800; line-height: 1;
+      text-decoration: none; white-space: nowrap; cursor: pointer;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.20);
+      animation: hueshift 5s linear infinite;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .go-btn:hover { transform: translateY(-3px) scale(1.14); box-shadow: 0 16px 40px rgba(0,0,0,0.32); }
+    @keyframes hueshift { to { filter: hue-rotate(360deg); } }
+    .go-btn .gch {
+      display: inline-block; opacity: 0;
+      text-shadow: 0 0 10px currentColor, 0 0 22px currentColor;   /* glow */
+      animation: gchin 0.5s cubic-bezier(.2,1.5,.4,1) forwards;
+    }
+    @keyframes gchin {
+      0%   { transform: translateY(10px) rotate(-16deg) scale(.4); opacity: 0; }
+      60%  { transform: translateY(-4px) rotate(10deg) scale(1.15); opacity: 1; }
+      100% { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
+    }
+    .go-btn:hover .gch { animation: gchwig .5s ease-in-out infinite; }
+    @keyframes gchwig { 0%,100% { transform: rotate(-7deg); opacity: 1; } 50% { transform: rotate(7deg); opacity: 1; } }
+    .confetti-p {
+      position: fixed; top: -24px; border-radius: 2px;
+      pointer-events: none; z-index: 20; animation: confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translate(0,0) rotate(0); opacity: 1; }
+      82%  { opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
+    }
+    /* subscribe form — matches the page (thick black borders, rounded, teal accent) */
+    .mlform { display: none; margin-top: 16px; gap: 8px; }
+    .mlform.show { display: flex; animation: mlin .28s ease both; }
+    @keyframes mlin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .mlform input {
+      flex: 1; min-width: 0;
+      font-family: 'Inter', system-ui, sans-serif; font-size: 15px; color: var(--ink);
+      background: #fff; border: 3px solid var(--ink); border-radius: 12px;
+      padding: 10px 12px; outline: none;
+    }
+    .mlform input::placeholder { color: #9aa0ab; }
+    .mlform input:focus { box-shadow: 0 0 0 3px rgba(15,181,166,.35); }
+    .mlform button {
+      flex-shrink: 0;
+      font-family: 'Inter', system-ui, sans-serif; font-size: 15px; font-weight: 700;
+      color: #fff; background: var(--ink); border: 3px solid var(--ink); border-radius: 12px;
+      padding: 10px 16px; cursor: pointer; transition: background .12s, border-color .12s;
+    }
+    .mlform button:hover { background: var(--teal); border-color: var(--teal); }
+    .ml-thanks { margin-top: 16px; font-weight: 600; color: var(--ink); font-family: 'Inter', system-ui, sans-serif; }
+    @media (max-width: 760px) {
+      .rblurb {
+        left: 18px; right: 18px; top: 20px; bottom: auto;
+        width: auto; max-width: none; transform: none;
+        font-size: 22px; line-height: 1.4;
+      }
+    }
+    .hint {
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      font-family:'Archivo Black',sans-serif; font-size:11px; letter-spacing:.14em;
+      color:var(--ink); opacity:.4; text-transform:uppercase; user-select:none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stage"></canvas>
+  <div id="rblurb" class="rblurb"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+  <script>
+  (function () {
+    var INK = '#0A0A0A', TEAL = '#0FB5A6', YELLOW = '#FFD23E', WHITE = '#FFFFFF';
+    var PASTELS = ['#FF9FB2', '#FFC487', '#FFE98A', '#9FE3C5', '#A9C7FF'];   // R O B O T
+    var M = Matter;
+    var Engine = M.Engine, Bodies = M.Bodies, Body = M.Body, Composite = M.Composite,
+        Constraint = M.Constraint, Events = M.Events, Vector = M.Vector;
+
+    var canvas = document.getElementById('stage');
+    var ctx = canvas.getContext('2d');
+    var W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+    var engine = Engine.create();
+    engine.gravity.y = 1;
+    engine.gravity.scale = 0.0016;
+
+    // tunable parameters (auto-tuned headless; see .context/tune/)
+    // domain-randomized robust policy for the 2x robot on flat ground
+    // (trained over start offset, mass, friction, initial velocity; see .context/tune/)
+    var P = {
+      Kp_a: 2.258, Kd_a: 0.392, vDes: 2.6, Kp_v: 0.003204,
+      springStiff: 0.1207, springDamp: 0.1128,
+      thrust: 1.143, tuck: 0.136, legRate: 0.4138
+    };
+
+    var world = engine.world;
+    var WORDS = ['THE', 'ROBOT', 'ENGINE'];
+    var lines = [];       // {ch, x, y, w} per stacked word, in css px
+    var fontPx = 120;
+    var baselineY = 0, capTopY = 0, groundY = 0, capH = 0, textLeft = 0, textRight = 0;
+    var platform = null;
+    var robot = null;
+    var groundContacts = 0;
+    var mouseX = 0, targetX = 0, mouseY = 0;   // mouse-follow (horizontal) + cursor pos for eyes
+    var antA = 0, antV = 0, prevVx = 0, prevVy = 0;   // antenna wobble (damped oscillator)
+    var eyeX = 0, eyeY = 0, eyeTX = 0, eyeTY = 0, sacTimer = 0;   // pupil saccades
+
+    function resize() {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * DPR; canvas.height = H * DPR;
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      layout();
+    }
+
+    function layout() {
+      // fit the font by the widest word (width) and by the 3-line stack (height)
+      var probe = 200;
+      ctx.font = '400 ' + probe + 'px "Archivo Black"';
+      var maxWordW = 0;
+      for (var k = 0; k < WORDS.length; k++) maxWordW = Math.max(maxWordW, ctx.measureText(WORDS[k]).width);
+      var padX = Math.max(22, Math.round(W * 0.05));
+      var fsByW = probe * (W - padX * 2) / maxWordW;
+      var fsByH = (H * 0.86) / (2 * 0.70 + 0.72);   // flush stack: 2 line-gaps + 1 cap-height
+      fontPx = Math.min(fsByW, fsByH, 240);
+      ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
+
+      var lineGap = fontPx * 0.70;                   // flush: rows touch, no vertical gap
+      capH = fontPx * 0.72;                          // ~cap height for Archivo Black
+      var span = 2 * lineGap + capH;                 // line1 cap-top .. line3 baseline
+      var topBaseline = H * 0.5 - span / 2 + capH;   // vertically centered stack
+
+      textLeft = padX;                               // left-justified
+      lines = [];
+      var maxW2 = 0;
+      for (var j = 0; j < WORDS.length; j++) {
+        var m = ctx.measureText(WORDS[j]);
+        var lb = m.actualBoundingBoxLeft || 0;       // first-glyph left bearing
+        // offset the origin so the ink LEFT EDGE lands exactly on padX for every word
+        lines.push({ ch: WORDS[j], x: padX + lb, y: topBaseline + j * lineGap, w: m.width });
+        if (m.width > maxW2) maxW2 = m.width;
+      }
+      textRight = padX + maxW2;
+      groundY = lines[lines.length - 1].y;           // collision floor at the base of ENGINE
+      capTopY = topBaseline - capH;
+      baselineY = topBaseline;
+      // publish geometry so the blurb aligns: its top to THE's top, its bottom to ROBOT's top
+      window.__titleBox = { top: capTopY, robotTop: lines[1].y - capH, ground: groundY, right: textRight, W: W };
+      window.dispatchEvent(new Event('titlebox'));
+
+      rebuildWorld();
+    }
+
+    function rebuildWorld() {
+      Composite.clear(world, false, true);
+      groundContacts = 0;
+
+      // single flat ground plane — the line ENGINE sits on
+      platform = Bodies.rectangle(W / 2, groundY + 60, W + 240, 120,
+        { isStatic: true, friction: 1, label: 'ground' });
+      // screen-edge walls: the robot collides and cannot roll off-screen
+      var wallL = Bodies.rectangle(-40, H / 2, 80, H * 4, { isStatic: true, friction: 0.15, label: 'wall' });
+      // right wall at ENGINE's right edge so the robot can't roll past it
+      var wallR = Bodies.rectangle(textRight + 40, H / 2, 80, H * 4, { isStatic: true, friction: 0.15, label: 'wall' });
+      Composite.add(world, [platform, wallL, wallR]);
+
+      buildRobot(W / 2, groundY - 170);
+    }
+
+    function buildRobot(x, y) {
+      var group = Body.nextGroup(true);     // parts never self-collide
+      var s = 2.0;                          // 2x robot
+      var bw = 42 * s, bh = 24 * s, wr = 11 * s, legLen = 20 * s, dx = 15 * s;
+
+      var chassis = Bodies.rectangle(x, y, bw, bh, {
+        collisionFilter: { group: group }, density: 0.0022, frictionAir: 0.02,
+        chamfer: { radius: 5 * s }, label: 'chassis'
+      });
+      var wheelL = Bodies.circle(x - dx, y + legLen, wr, {
+        collisionFilter: { group: group }, friction: 1, frictionAir: 0.01, density: 0.0014, label: 'wheel'
+      });
+      var wheelR = Bodies.circle(x + dx, y + legLen, wr, {
+        collisionFilter: { group: group }, friction: 1, frictionAir: 0.01, density: 0.0014, label: 'wheel'
+      });
+
+      // springy legs: two constraints per wheel -> suspension that allows vertical travel
+      function leg(wheel, ax) {
+        return [
+          Constraint.create({ bodyA: chassis, pointA: { x: ax, y: bh / 2 }, bodyB: wheel, stiffness: P.springStiff, damping: P.springDamp, length: legLen }),
+          Constraint.create({ bodyA: chassis, pointA: { x: ax * 0.2, y: bh / 2 }, bodyB: wheel, stiffness: P.springStiff * 0.6, damping: P.springDamp, length: legLen * 1.02 })
+        ];
+      }
+      var springs = leg(wheelL, -dx).concat(leg(wheelR, dx));
+      springs.forEach(function (cn) { cn._base = cn.length; });
+
+      robot = { group: group, chassis: chassis, wheels: [wheelL, wheelR], springs: springs, s: s, legLen: legLen };
+      Composite.add(world, [chassis, wheelL, wheelR].concat(springs));
+    }
+
+    // ---- contact tracking for "grounded" ----
+    Events.on(engine, 'collisionStart', function (e) {
+      e.pairs.forEach(function (p) {
+        if ((p.bodyA.label === 'ground' && p.bodyB.label === 'wheel') ||
+            (p.bodyB.label === 'ground' && p.bodyA.label === 'wheel')) groundContacts++;
+      });
+    });
+    Events.on(engine, 'collisionEnd', function (e) {
+      e.pairs.forEach(function (p) {
+        if ((p.bodyA.label === 'ground' && p.bodyB.label === 'wheel') ||
+            (p.bodyB.label === 'ground' && p.bodyA.label === 'wheel')) groundContacts = Math.max(0, groundContacts - 1);
+      });
+    });
+
+    // ---- controller (PID balance + damped mouse-follow + hops) ----
+    var FOLLOW_EASE = 0.035, FOLLOW_P = 0.02, FOLLOW_MAXV = 2.4;
+    function control() {
+      if (!robot) return;
+      var c = robot.chassis;
+      var grounded = groundContacts > 0;
+
+      // PID: keep the body upright
+      var torque = P.Kp_a * (0 - c.angle) - P.Kd_a * c.angularVelocity;
+      c.torque = torque * c.mass * 2.2;
+
+      // dampened mouse-follow: ease a target toward the mouse, drive toward it
+      targetX += (mouseX - targetX) * FOLLOW_EASE;
+      var desiredVx = (targetX - c.position.x) * FOLLOW_P;
+      if (desiredVx > FOLLOW_MAXV) desiredVx = FOLLOW_MAXV;
+      if (desiredVx < -FOLLOW_MAXV) desiredVx = -FOLLOW_MAXV;
+      Body.applyForce(c, c.position, { x: P.Kp_v * (desiredVx - c.velocity.x) * c.mass, y: 0 });
+
+      // spring-thrust hop: extend legs in stance (push off), tuck in flight
+      var factor = grounded ? (1 + P.thrust) : (1 - P.tuck);
+      robot.springs.forEach(function (cn) { cn.length += (cn._base * factor - cn.length) * P.legRate; });
+
+      // antenna wobble: damped harmonic oscillator excited by the body's accel
+      var ax = c.velocity.x - prevVx, ay = c.velocity.y - prevVy;
+      prevVx = c.velocity.x; prevVy = c.velocity.y;
+      antV += -ax * 0.16 - ay * 0.045;         // gentle excitation (subtle wobble)
+      antV += -0.08 * antA - 0.07 * antV;      // spring + damping => damped sine
+      antA += antV;
+      if (antA > 0.5) { antA = 0.5; antV = 0; }
+      if (antA < -0.5) { antA = -0.5; antV = 0; }
+
+      // pupil saccades that track the cursor: hold, then dart to re-aim at it
+      if (--sacTimer <= 0) {
+        var gx = mouseX - c.position.x, gy = mouseY - c.position.y;
+        var gl = Math.hypot(gx, gy) || 1;
+        eyeTX = (gx / gl) * 2.8;
+        eyeTY = (gy / gl) * 2.0;
+        sacTimer = 22 + Math.random() * 70;
+      }
+      eyeX += (eyeTX - eyeX) * 0.5;   // quick snap = saccade
+      eyeY += (eyeTY - eyeY) * 0.5;
+
+      // safety: if it somehow falls, respawn
+      if (c.position.y > H + 300) resetRobot();
+    }
+
+    function resetRobot() {
+      var startX = W / 2;
+      var startY = groundY - 170;
+      var c = robot.chassis;
+      Body.setPosition(c, { x: startX, y: startY });
+      Body.setAngle(c, 0); Body.setVelocity(c, { x: 0, y: 0 }); Body.setAngularVelocity(c, 0);
+      robot.wheels.forEach(function (w, i) {
+        Body.setPosition(w, { x: startX + (i === 0 ? -15 : 15) * robot.s, y: startY + robot.legLen });
+        Body.setVelocity(w, { x: 0, y: 0 }); Body.setAngularVelocity(w, 0);
+      });
+      // restore spring rest-lengths so a mid-thrust reset doesn't fling the robot
+      robot.springs.forEach(function (cn) { cn.length = cn._base; });
+    }
+
+    // ---- rendering ----
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // letters
+      ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
+      ctx.textBaseline = 'alphabetic';
+      for (var i = 0; i < lines.length; i++) {
+        if (i === 1) {
+          // ROBOT: each letter a different pastel color with a bold black outline
+          var word = lines[i].ch;
+          ctx.lineJoin = 'round';
+          ctx.lineWidth = fontPx * 0.035;
+          var ox = ctx.lineWidth / 2;    // visible outline -> align the OUTLINE edge to padX
+          var tms = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+          for (var ci = 0; ci < word.length; ci++) {
+            var cx = lines[i].x + ox + ctx.measureText(word.substring(0, ci)).width;
+            var L = 50 + 50 * Math.sin((tms * 0.0016) + ci * 0.9);
+            // animated greyscale outline (full white <-> dark) with a broad, subtle glow
+            ctx.strokeStyle = 'hsl(0, 0%, ' + L + '%)';
+            ctx.shadowColor = 'hsla(0, 0%, ' + L + '%, 0.85)';
+            ctx.shadowBlur = fontPx * 0.13;
+            ctx.strokeText(word[ci], cx, lines[i].y);
+            ctx.shadowBlur = 0;   // crisp pastel fill, no glow
+            ctx.fillStyle = PASTELS[ci % PASTELS.length]; ctx.fillText(word[ci], cx, lines[i].y);
+          }
+          ctx.shadowColor = 'transparent';
+        } else {
+          ctx.fillStyle = INK;
+          ctx.fillText(lines[i].ch, lines[i].x, lines[i].y);
+        }
+      }
+
+      // ground line (the collision plane, visualized) at the base of the letters
+      ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.moveTo(0, groundY + 1.5); ctx.lineTo(W, groundY + 1.5); ctx.stroke();
+
+      if (!robot) return;
+      var c = robot.chassis, s = robot.s;
+      var bw = 42 * s, bh = 24 * s, HALO = 4 * s, ANT_LEN = 15 * s;   // outline width + taller antenna
+      function legAnchor(i) { return worldPoint(c, { x: (i === 0 ? -15 : 15) * s, y: 12 * s }); }
+
+      // ---- bold white outline pass (behind the robot, so it reads on the black letters) ----
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = WHITE; ctx.lineWidth = 5 * s + 2 * HALO;
+      robot.wheels.forEach(function (w, i) { var a = legAnchor(i); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(w.position.x, w.position.y); ctx.stroke(); });
+      ctx.fillStyle = WHITE;
+      robot.wheels.forEach(function (w) { ctx.beginPath(); ctx.arc(w.position.x, w.position.y, 11 * s + HALO, 0, 7); ctx.fill(); });
+      ctx.save(); ctx.translate(c.position.x, c.position.y); ctx.rotate(c.angle);
+      roundRect(-bw / 2 - HALO, -bh / 2 - HALO, bw + 2 * HALO, bh + 2 * HALO, 6 * s + HALO);
+      ctx.fillStyle = WHITE; ctx.fill();
+      ctx.save(); ctx.translate(0, -bh / 2); ctx.rotate(antA);   // antenna base + wobble
+      ctx.strokeStyle = WHITE; ctx.lineWidth = 3 * s + 2 * HALO; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -ANT_LEN); ctx.stroke();
+      ctx.fillStyle = WHITE; ctx.beginPath(); ctx.arc(0, -ANT_LEN, 3.4 * s + HALO, 0, 7); ctx.fill();
+      ctx.restore();
+      ctx.restore();
+
+      // ---- normal pass ----
+      ctx.strokeStyle = INK; ctx.lineCap = 'round'; ctx.lineWidth = 5 * s;
+      robot.wheels.forEach(function (w, i) { var a = legAnchor(i); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(w.position.x, w.position.y); ctx.stroke(); });
+      robot.wheels.forEach(function (w) {
+        drawCircle(w.position.x, w.position.y, 11 * s, TEAL, INK, 3.5 * s);
+        ctx.save(); ctx.translate(w.position.x, w.position.y); ctx.rotate(w.angle);
+        ctx.strokeStyle = INK; ctx.lineWidth = 2 * s;
+        ctx.beginPath(); ctx.moveTo(-7 * s, 0); ctx.lineTo(7 * s, 0);
+        ctx.moveTo(0, -7 * s); ctx.lineTo(0, 7 * s); ctx.stroke();
+        ctx.restore();
+      });
+      ctx.save();
+      ctx.translate(c.position.x, c.position.y); ctx.rotate(c.angle);
+      roundRect(-bw / 2, -bh / 2, bw, bh, 6 * s);
+      ctx.fillStyle = TEAL; ctx.fill(); ctx.lineWidth = 3.5 * s; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.save(); ctx.translate(0, -bh / 2); ctx.rotate(antA);   // antenna base + wobble
+      ctx.strokeStyle = INK; ctx.lineWidth = 3 * s; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -ANT_LEN); ctx.stroke();
+      drawCircle(0, -ANT_LEN, 3.4 * s, YELLOW, INK, 2 * s);
+      ctx.restore();
+      var ER = 6.6 * s;   // larger eye whites (pupils keep their diameter)
+      drawCircle(-8 * s, -1 * s, ER, WHITE, INK, 2 * s);
+      drawCircle(8 * s, -1 * s, ER, WHITE, INK, 2 * s);
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(-8 * s + eyeX * s, -1 * s + eyeY * s, 1.8 * s, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(8 * s + eyeX * s, -1 * s + eyeY * s, 1.8 * s, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+
+    function worldPoint(body, local) {
+      var cos = Math.cos(body.angle), sin = Math.sin(body.angle);
+      return { x: body.position.x + local.x * cos - local.y * sin, y: body.position.y + local.x * sin + local.y * cos };
+    }
+    function drawCircle(x, y, r, fill, stroke, lw) {
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = stroke; ctx.stroke();
+    }
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+
+    // ---- loop ----
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function frame() {
+      control();
+      Engine.update(engine, 1000 / 60);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    // mouse-follow: track the horizontal pointer position
+    window.addEventListener('pointermove', function (e) { mouseX = e.clientX; mouseY = e.clientY; });
+
+    // mobile: tilt the phone (gamma = left/right tilt) to steer the robot
+    function onTilt(e) {
+      if (e.gamma == null) return;
+      var g = Math.max(-35, Math.min(35, e.gamma));
+      mouseX = W / 2 + (g / 35) * (W / 2);
+      mouseY = H * 0.35;
+    }
+    window.addEventListener('deviceorientation', onTilt);
+    window.addEventListener('touchstart', function once() {
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(function (s) { if (s === 'granted') window.addEventListener('deviceorientation', onTilt); }).catch(function () {});
+      }
+      window.removeEventListener('touchstart', once);
+    }, { passive: true });
+
+    window.addEventListener('resize', resize);
+    function start() { resize(); mouseX = W / 2; targetX = W / 2; mouseY = H * 0.4; if (reduce) { draw(); } else { requestAnimationFrame(frame); } }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(start); } else { start(); }
+  })();
+  </script>
+
+  <script>
+    // typed-on blurb (right side)
+    (function () {
+      var el = document.getElementById('rblurb');
+      if (!el) return;
+      var LEAD = "Create, train, and deploy intelligent robots into the real world using agentic co-design. That's right! Robots creating better robots to help you realize your ideas. ";
+      var GO = "LETS GO";
+      var txt = document.createTextNode(''), cur = document.createElement('span');
+      cur.className = 'cur'; cur.textContent = ' ';
+      el.appendChild(txt); el.appendChild(cur);
+      var i = 0;
+      function type() {
+        if (i < LEAD.length) { i++; txt.nodeValue = LEAD.slice(0, i); setTimeout(type, 24); }
+        else { revealGo(); }
+      }
+      // confetti: drops from the top edge of the window and floats down slowly, random sizes
+      function confetti() {
+        var cols = ['#FF3B6B', '#FFC043', '#35E0A1', '#6E8BFF', '#B07BFF', '#FF7A3D', '#19C3FB'];
+        var groundLine = (window.__titleBox && window.__titleBox.ground) || window.innerHeight;
+        for (var n = 0; n < 26; n++) {
+          var p = document.createElement('div');
+          p.className = 'confetti-p';
+          var sz = 6 + Math.random() * 11;
+          p.style.width = sz.toFixed(1) + 'px';
+          p.style.height = (sz * (0.55 + Math.random() * 0.7)).toFixed(1) + 'px';
+          p.style.left = (Math.random() * 100) + 'vw';
+          p.style.background = cols[(Math.random() * cols.length) | 0];
+          var dur = 3.2 + Math.random() * 3.4;
+          p.style.setProperty('--dx', ((Math.random() * 2 - 1) * 90).toFixed(0) + 'px');
+          p.style.setProperty('--dy', (groundLine + 24) + 'px');   // land / vanish at the ground line
+          p.style.setProperty('--rot', ((Math.random() * 2 - 1) * 540).toFixed(0) + 'deg');
+          p.style.animationDuration = dur.toFixed(2) + 's';
+          p.style.animationDelay = (Math.random() * 0.6).toFixed(2) + 's';
+          document.body.appendChild(p);
+          (function (e2, d) { setTimeout(function () { e2.remove(); }, (d + 1.2) * 1000); })(p, dur);
+        }
+      }
+      function revealGo() {
+        if (cur.parentNode) el.removeChild(cur);
+        el.appendChild(document.createElement('br'));
+        var a = document.createElement('a');
+        a.className = 'go-btn'; a.href = '#';
+        for (var k = 0; k < GO.length; k++) {
+          var sp = document.createElement('span');
+          sp.className = 'gch';
+          sp.textContent = GO[k] === ' ' ? ' ' : GO[k];
+          sp.style.color = 'hsl(' + (k * 48) + ', 90%, 55%)';
+          sp.style.animationDelay = (k * 0.08) + 's';
+          a.appendChild(sp);
+        }
+        el.appendChild(a);
+
+        // email subscribe field, revealed on click
+        var form = document.createElement('form');
+        form.className = 'mlform';
+        var input = document.createElement('input');
+        input.type = 'email'; input.required = true; input.placeholder = 'you@email.com';
+        input.setAttribute('aria-label', 'Email address');
+        var sub = document.createElement('button');
+        sub.type = 'submit'; sub.textContent = 'Subscribe';
+        form.appendChild(input); form.appendChild(sub);
+        el.appendChild(form);
+
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          confetti();
+          form.classList.add('show');
+          layoutBlurb();
+          setTimeout(function () { input.focus(); }, 60);
+        });
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var thanks = document.createElement('div');
+          thanks.className = 'ml-thanks';
+          thanks.textContent = "You're on the list 🎉";
+          form.replaceWith(thanks);
+          layoutBlurb();
+        });
+        layoutBlurb();
+      }
+
+      // position + size the blurb: top aligned to THE's top, bottom to ROBOT's top
+      function layoutBlurb() {
+        var tb = window.__titleBox;
+        if (!tb) return;
+        if (tb.W <= 760) {
+          // mobile: place the blurb + subscribe below the THE ROBOT ENGINE line
+          el.style.left = '18px'; el.style.right = '18px';
+          el.style.width = 'auto'; el.style.maxWidth = 'none';
+          el.style.top = (tb.ground + 28) + 'px';
+          el.style.transform = 'none';
+          return;
+        }
+        var gapW = tb.W - tb.right;
+        var bw = Math.min(480, Math.max(240, gapW - 24));
+        el.style.left = (tb.right + (gapW - bw) / 2) + 'px';
+        el.style.right = 'auto';
+        el.style.width = bw + 'px';
+        el.style.maxWidth = 'none';
+        el.style.top = tb.top + 'px';     // top aligned with THE's top; fixed font size (CSS)
+        el.style.transform = 'none';
+      }
+      window.addEventListener('titlebox', layoutBlurb);
+      window.addEventListener('resize', function () { setTimeout(layoutBlurb, 60); });
+      function begin() { layoutBlurb(); setTimeout(type, 500); }
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(begin); } else { begin(); }
+    })();
+  </script>
+</body>
+</html>
