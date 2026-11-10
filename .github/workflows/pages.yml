@@ -23,15 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Assemble dist (root = The Robot Engine; B/C/D/E variants)
+      - name: Assemble dist (The Robot Engine)
         run: |
           mkdir -p dist
           cp -R v8-letterhop/. dist/
-          mkdir -p dist/b dist/c dist/d dist/e
-          cp -R v3-robotfirst/. dist/b/
-          cp -R v4-prototype/.  dist/c/
-          cp -R v5-substrate/.  dist/d/
-          cp -R v6-sim2real/.   dist/e/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
