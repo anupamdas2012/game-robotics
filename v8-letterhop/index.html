@@ -458,14 +458,22 @@
     (function () {
       var el = document.getElementById('rblurb');
       if (!el) return;
-      var LEAD = "Create, train, and deploy intelligent robots into the real world using agentic co-design. That's right! Robots creating better robots to help you realize your ideas. ";
+      var LEAD1 = "The engine for robot builders.";
+      var LEAD2 = "The platform where the physical AI community collaborates on hardware, frontier models, and workflows to bring robots to life.";
       var GO = "LETS GO";
-      var txt = document.createTextNode(''), cur = document.createElement('span');
-      cur.className = 'cur'; cur.textContent = ' ';
-      el.appendChild(txt); el.appendChild(cur);
-      var i = 0;
+      var leadEl = document.createElement('strong'); leadEl.className = 'lead';
+      var cur = document.createElement('span'); cur.className = 'cur'; cur.textContent = ' ';
+      el.appendChild(leadEl); el.appendChild(cur);
+      var bodyEl = null, p1 = 0, p2 = 0;
       function type() {
-        if (i < LEAD.length) { i++; txt.nodeValue = LEAD.slice(0, i); setTimeout(type, 24); }
+        if (p1 < LEAD1.length) { p1++; leadEl.textContent = LEAD1.slice(0, p1); setTimeout(type, 30); }
+        else if (!bodyEl) {
+          el.insertBefore(document.createElement('br'), cur);
+          el.insertBefore(document.createElement('br'), cur);
+          bodyEl = document.createElement('span'); el.insertBefore(bodyEl, cur);
+          setTimeout(type, 220);
+        }
+        else if (p2 < LEAD2.length) { p2++; bodyEl.textContent = LEAD2.slice(0, p2); setTimeout(type, 22); }
         else { revealGo(); }
       }
       // confetti: drops from the top edge of the window and floats down slowly, random sizes
