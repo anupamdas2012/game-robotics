@@ -176,7 +176,9 @@
       var lineGap = fontPx * 0.70;                   // flush: rows touch, no vertical gap
       capH = fontPx * 0.72;                          // ~cap height for Archivo Black
       var span = 2 * lineGap + capH;                 // line1 cap-top .. line3 baseline
-      var topBaseline = H * 0.5 - span / 2 + capH;   // vertically centered stack
+      // desktop: vertically centered; mobile: push the title to the top of the screen
+      var capTop = (W <= 760) ? Math.max(16, H * 0.02) : (H * 0.5 - span / 2);
+      var topBaseline = capTop + capH;
 
       textLeft = padX;                               // left-justified
       lines = [];
@@ -212,12 +214,15 @@
       var wallR = Bodies.rectangle(textRight + 40, H / 2, 80, H * 4, { isStatic: true, friction: 0.15, label: 'wall' });
       Composite.add(world, [platform, wallL, wallR]);
 
-      buildRobot(W / 2, groundY - 170);
+      buildRobot(W / 2, groundY - 85 * Math.max(1.0, Math.min(2.0, fontPx / 120)));
     }
 
     function buildRobot(x, y) {
       var group = Body.nextGroup(true);     // parts never self-collide
-      var s = 2.0;                          // 2x robot
+      // scale the robot with the title (responsive), clamped to a numerically-stable range;
+      // tie gravity to the scale so the gait stays the same at every size
+      var s = Math.max(1.0, Math.min(2.0, fontPx / 120));
+      engine.gravity.scale = 0.0008 * s;
       var bw = 42 * s, bh = 24 * s, wr = 11 * s, legLen = 20 * s, dx = 15 * s;
 
       var chassis = Bodies.rectangle(x, y, bw, bh, {
@@ -307,7 +312,7 @@
 
     function resetRobot() {
       var startX = W / 2;
-      var startY = groundY - 170;
+      var startY = groundY - 85 * robot.s;
       var c = robot.chassis;
       Body.setPosition(c, { x: startX, y: startY });
       Body.setAngle(c, 0); Body.setVelocity(c, { x: 0, y: 0 }); Body.setAngularVelocity(c, 0);
