@@ -1,0 +1,68 @@
+/* ============================================================
+   Experiment — "The Robot Engine"
+   Same neo-brutalist system: white + grid, Archivo Black, ink,
+   teal accent. Left-justified stacked headline with a pixel-art
+   robot backflipping from word to word (a nod to RL-trained
+   agile robots).
+   ============================================================ */
+
+:root {
+  --bg:   #FFFFFF;
+  --grid: rgba(0, 0, 0, 0.06);
+  --ink:  #0A0A0A;
+  --teal: #0FB5A6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, var(--grid) 1.5px, transparent 1.5px);
+  background-size: 46px 46px;
+  color: var(--ink);
+  min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 2rem clamp(1.5rem, 6vw, 6rem);
+}
+
+.rk {
+  position: relative;
+  font-family: 'Archivo Black', sans-serif;
+  font-weight: 400;
+  font-size: clamp(3rem, 15vw, 9.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.rk-line { display: block; }
+.rk-word { display: inline-block; }
+
+.robot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(42px, 7vw, 66px);
+  will-change: transform;
+  transform-origin: 50% 50%;
+}
+.robot-sprite {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .robot { /* JS parks it on the first word */ }
+}
