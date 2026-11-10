@@ -109,11 +109,15 @@
       font-family:'Archivo Black',sans-serif; font-size:11px; letter-spacing:.14em;
       color:var(--ink); opacity:.4; text-transform:uppercase; user-select:none;
     }
+    .sr-only { position:absolute; left:-9999px; top:0; }
+    .sr-only:focus { left:8px; top:8px; z-index:50; background:#fff; color:#0A0A0A;
+      border:2px solid #0A0A0A; border-radius:8px; padding:6px 10px; font:600 13px Inter, sans-serif; }
   </style>
 </head>
 <body>
   <canvas id="stage"></canvas>
   <div id="rblurb" class="rblurb"></div>
+  <a class="sr-only" href="origins/">Read: Origins of Robotic Lifeforms — click the robot</a>
 
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
   <script>
@@ -152,6 +156,8 @@
     var mouseX = 0, targetX = 0, mouseY = 0;   // mouse-follow (horizontal) + cursor pos for eyes
     var antA = 0, antV = 0, prevVx = 0, prevVy = 0;   // antenna wobble (damped oscillator)
     var eyeX = 0, eyeY = 0, eyeTX = 0, eyeTY = 0, sacTimer = 0;   // pupil saccades
+    var bubbleStart = 0, bubbleRect = null;            // periodic "click me!" hint over the robot
+    var B_PERIOD = 8000, B_SHOW = 2600;                // visible ~2.6s, every 8s
 
     function resize() {
       W = window.innerWidth; H = window.innerHeight;
@@ -409,6 +415,8 @@
       ctx.beginPath(); ctx.arc(-8 * s + eyeX * s, -1 * s + eyeY * s, 1.8 * s, 0, 7); ctx.fill();
       ctx.beginPath(); ctx.arc(8 * s + eyeX * s, -1 * s + eyeY * s, 1.8 * s, 0, 7); ctx.fill();
       ctx.restore();
+
+      drawHint();
     }
 
     function worldPoint(body, local) {
@@ -425,6 +433,64 @@
       ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
     }
 
+    // ---- clickable robot + periodic "click me!" hint ----
+    function robotHit(px, py) {
+      if (!robot) return false;
+      var c = robot.chassis, s = robot.s;
+      var ddx = px - c.position.x, ddy = py - (c.position.y + 6 * s), R = 46 * s;
+      if (ddx * ddx + ddy * ddy <= R * R) return true;
+      if (bubbleRect && px >= bubbleRect.x && px <= bubbleRect.x + bubbleRect.w &&
+          py >= bubbleRect.y && py <= bubbleRect.y + bubbleRect.h) return true;
+      return false;
+    }
+
+    function drawHint() {
+      if (!robot) { bubbleRect = null; return; }
+      var now = (window.performance && performance.now ? performance.now() : Date.now());
+      var t = now - bubbleStart;
+      if (t < 0) { bubbleRect = null; return; }
+      var ph = t % B_PERIOD;
+      if (ph > B_SHOW) { bubbleRect = null; return; }
+      var a = 1;
+      if (ph < 300) a = ph / 300;
+      else if (ph > B_SHOW - 420) a = Math.max(0, (B_SHOW - ph) / 420);
+
+      var c = robot.chassis, s = robot.s;
+      var fs = Math.round(15 * Math.min(1.5, s));
+      ctx.save();
+      ctx.font = '800 ' + fs + 'px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      var text = 'click me!';
+      var tw = ctx.measureText(text).width;
+      var padX = Math.round(fs * 0.85), padY = Math.round(fs * 0.55);
+      var w = tw + padX * 2, h = fs + padY * 2, r = Math.min(13, h / 2);
+      var bob = Math.sin(now * 0.004) * 3;
+      var bottom = c.position.y - (27 * s) - 18 + bob;   // box bottom, above the antenna
+      var y = bottom - h, x = c.position.x - w / 2;
+      x = Math.max(8, Math.min(W - w - 8, x));
+      if (y < 8) { y = 8; bottom = y + h; }
+      var tbx = Math.max(x + r + 7, Math.min(x + w - r - 7, c.position.x));
+
+      ctx.globalAlpha = a;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+      ctx.lineTo(x + w, bottom - r); ctx.arcTo(x + w, bottom, x + w - r, bottom, r);
+      ctx.lineTo(tbx + 7, bottom); ctx.lineTo(tbx, bottom + 9); ctx.lineTo(tbx - 7, bottom);
+      ctx.lineTo(x + r, bottom); ctx.arcTo(x, bottom, x, bottom - r, r);
+      ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+      ctx.shadowColor = 'rgba(0,0,0,0.18)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+      ctx.fillStyle = WHITE; ctx.fill();
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.lineJoin = 'round'; ctx.lineWidth = 2.5; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.fillStyle = TEAL; ctx.textBaseline = 'middle';
+      ctx.fillText(text, x + padX, y + h / 2 + 1);
+      ctx.restore();
+
+      bubbleRect = { x: x, y: y, w: w, h: h };
+    }
+
     // ---- loop ----
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function frame() {
@@ -434,8 +500,13 @@
       requestAnimationFrame(frame);
     }
 
-    // mouse-follow: track the horizontal pointer position
-    window.addEventListener('pointermove', function (e) { mouseX = e.clientX; mouseY = e.clientY; });
+    // mouse-follow: track the horizontal pointer position; pointer cursor over the robot
+    window.addEventListener('pointermove', function (e) {
+      mouseX = e.clientX; mouseY = e.clientY;
+      canvas.style.cursor = robotHit(e.clientX, e.clientY) ? 'pointer' : 'default';
+    });
+    // click the robot (or its "click me!" hint) -> open the Origins article
+    canvas.addEventListener('click', function (e) { if (robotHit(e.clientX, e.clientY)) window.location.href = 'origins/'; });
 
     // mobile: tilt the phone (gamma = left/right tilt) to steer the robot
     function onTilt(e) {
@@ -453,7 +524,7 @@
     }, { passive: true });
 
     window.addEventListener('resize', resize);
-    function start() { resize(); mouseX = W / 2; targetX = W / 2; mouseY = H * 0.4; if (reduce) { draw(); } else { requestAnimationFrame(frame); } }
+    function start() { resize(); mouseX = W / 2; targetX = W / 2; mouseY = H * 0.4; bubbleStart = (window.performance && performance.now ? performance.now() : Date.now()) + 1600; if (reduce) { draw(); } else { requestAnimationFrame(frame); } }
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(start); } else { start(); }
   })();
   </script>

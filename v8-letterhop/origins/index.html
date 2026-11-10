@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Origins of Robotic Lifeforms — Game Robotics</title>
+  <meta name="description" content="How machines first learned to move like they're alive — from Marc Raibert's hopping robots to today's Microduck and Unitree — and the Game Robotics vision for bringing it all together." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%97%89%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#FFFFFF; --grid:rgba(0,0,0,0.06); --ink:#0A0A0A; --dim:#555; --teal:#0FB5A6;
+      --pink:#FF9FB2; --peach:#FFC487; --yellow:#FFE98A; --mint:#9FE3C5; --blue:#A9C7FF;
+      --bd:3px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, var(--grid) 1.5px, transparent 1.5px);
+      background-size: 46px 46px;
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+
+    /* ---- top nav ---- */
+    .nav {
+      display:flex; align-items:center; justify-content:space-between;
+      max-width:1100px; margin:0 auto; padding:22px clamp(18px,4vw,40px);
+    }
+    .brand { display:inline-flex; align-items:center; gap:.5rem; text-decoration:none;
+      font-family:'Archivo Black',sans-serif; font-size:.95rem; letter-spacing:.01em; }
+    .brand .mark { color:var(--teal); }
+    .back {
+      font-weight:700; font-size:.85rem; text-decoration:none; color:var(--ink);
+      border:var(--bd) solid var(--ink); border-radius:10px; padding:.45rem .8rem;
+      background:#fff; box-shadow:4px 4px 0 var(--ink); transition:transform .1s, box-shadow .1s;
+    }
+    .back:hover { transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--teal); }
+
+    /* ---- layout ---- */
+    .wrap { max-width:760px; margin:0 auto; padding:0 clamp(18px,4vw,40px) 120px; }
+    .hero { max-width:900px; margin:0 auto; padding:clamp(28px,6vh,70px) clamp(18px,4vw,40px) 10px; }
+    .eyebrow { font-family:'Archivo Black',sans-serif; font-size:.72rem; letter-spacing:.22em;
+      color:var(--teal); text-transform:uppercase; }
+    h1 {
+      font-family:'Archivo Black',sans-serif; font-weight:400; text-transform:uppercase;
+      font-size:clamp(2.4rem,7vw,4.6rem); line-height:.98; letter-spacing:-0.01em;
+      margin:.5rem 0 1rem;
+    }
+    h1 em { font-style:normal; color:var(--teal); -webkit-text-stroke:1.5px var(--ink); }
+    .lede { font-size:clamp(1.1rem,2.4vw,1.4rem); color:var(--dim); font-weight:500; max-width:42ch; }
+
+    .section { margin-top:clamp(48px,8vh,92px); }
+    .kicker { font-family:'Archivo Black',sans-serif; font-size:.72rem; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--ink); background:var(--mint);
+      border:var(--bd) solid var(--ink); border-radius:100px; padding:.4rem .9rem; display:inline-block; }
+    h2 { font-family:'Archivo Black',sans-serif; font-weight:400; font-size:clamp(1.7rem,4.5vw,2.8rem);
+      line-height:1.02; letter-spacing:-0.01em; margin:1rem 0 1rem; }
+    h2 em { font-style:normal; color:var(--teal); }
+    p { font-size:1.08rem; color:#1c1c1c; margin:0 0 1.1rem; }
+    p .hl { background:linear-gradient(180deg,transparent 60%, var(--yellow) 60%); padding:0 .12em; font-weight:600; }
+    .note { font-size:.95rem; color:var(--dim); }
+
+    /* ---- figures / photos ---- */
+    figure {
+      margin:1.8rem 0; background:#fff; border:var(--bd) solid var(--ink); border-radius:18px;
+      box-shadow:8px 8px 0 var(--ink); overflow:hidden;
+    }
+    .photo { display:grid; place-items:center; padding:22px; background:linear-gradient(180deg,#fff,#f4f4f2); }
+    .photo img { max-width:100%; max-height:360px; width:auto; height:auto; display:block;
+      border-radius:6px; background:#fff; }
+    figcaption { border-top:var(--bd) solid var(--ink); padding:.75rem 1.05rem;
+      font-size:.84rem; color:var(--dim); display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; align-items:baseline; }
+    figcaption b { color:var(--ink); }
+    figcaption a { color:var(--teal); font-weight:600; text-decoration:none; }
+    figcaption a:hover { text-decoration:underline; }
+    .duo { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:1.8rem 0; }
+    .duo figure { margin:0; }
+    .duo .photo img { max-height:300px; }
+    .tint-pink .photo{background:linear-gradient(180deg,#fff,#ffeef2);}
+    .tint-mint .photo{background:linear-gradient(180deg,#fff,#eafaf2);}
+    .tint-yellow .photo{background:linear-gradient(180deg,#fff,#fff6d8);}
+    .tint-blue .photo{background:linear-gradient(180deg,#fff,#eef3ff);}
+    @media (max-width:620px){ .duo{grid-template-columns:1fr;} }
+
+    /* ---- the challenge grid ---- */
+    .challenge { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:1.6rem 0; }
+    .challenge div { border:2px solid var(--ink); border-radius:12px; padding:.9rem 1rem; background:#fff; }
+    .challenge b { font-family:'Archivo Black',sans-serif; font-weight:400; font-size:.8rem;
+      letter-spacing:.02em; display:block; margin-bottom:.2rem; }
+    .challenge span { font-size:.92rem; color:var(--dim); }
+    @media (max-width:560px){ .challenge{grid-template-columns:1fr;} }
+
+    /* ---- closing vision ---- */
+    .vision {
+      margin-top:clamp(56px,9vh,110px); background:var(--ink); color:#fff;
+      border-radius:24px; padding:clamp(28px,5vw,56px); box-shadow:10px 10px 0 var(--teal);
+    }
+    .vision .kicker { background:var(--teal); border-color:#fff; color:var(--ink); }
+    .vision h2 { color:#fff; margin-top:1rem; }
+    .vision h2 em { color:var(--mint); }
+    .vision p { color:#d7d7d7; }
+    .vision strong { color:#fff; }
+    .vision .pillars { display:flex; flex-wrap:wrap; gap:10px; margin:1.4rem 0 1.6rem; }
+    .vision .pillars span { font-weight:700; font-size:.82rem; letter-spacing:.02em;
+      border:2px solid #fff; border-radius:100px; padding:.4rem .9rem; color:#fff; }
+    .cta {
+      display:inline-block; font-family:'Inter',sans-serif; font-weight:800; font-size:1.1rem;
+      color:var(--ink); background:#fff; border-radius:14px; padding:.8rem 1.4rem; text-decoration:none;
+      box-shadow:0 8px 24px rgba(0,0,0,.25); transition:transform .12s;
+    }
+    .cta:hover { transform:translateY(-2px); }
+
+    footer { text-align:center; color:var(--dim); font-size:.8rem; padding:40px 20px 60px; max-width:760px; margin:0 auto; }
+    footer a { color:var(--dim); }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="../"><span class="mark">◉</span>&nbsp;GAME ROBOTICS</a>
+    <a class="back" href="../">← The Robot Engine</a>
+  </header>
+
+  <div class="hero">
+    <p class="eyebrow">◢◣ A short history</p>
+    <h1>Origins of<br />robotic <em>lifeforms</em>.</h1>
+    <p class="lede">How machines first learned to move like they're alive — and how we finally make it buildable.</p>
+  </div>
+
+  <article class="wrap">
+    <p style="font-size:1.18rem;">
+      There's a particular kind of magic the first time a machine catches itself. Not a programmed pose or a
+      scripted walk — a <span class="hl">reflex</span>. A stumble, corrected. A hop, landed. For a moment it stops
+      looking like a mechanism and starts looking like something <em>alive</em>. That flicker — intelligence meeting
+      lifelike movement — is what everyone building robots is really chasing. This is the short story of where it
+      began, and what it takes to get there.
+    </p>
+
+    <!-- 1. Raibert -->
+    <section class="section">
+      <span class="kicker">The first hops · 1980s</span>
+      <h2>A machine learns to <em>balance</em>.</h2>
+      <p>
+        In 1980, <b>Marc Raibert</b> founded the <b>MIT Leg Laboratory</b>. While most robots of the era crept
+        along in careful, statically-stable poses — always keeping their center of mass over their feet — Raibert's
+        machines did the opposite. They <span class="hl">fell, and caught themselves</span>.
+      </p>
+      <p>
+        His hopping robots balanced the way living things do: dynamically. A springy leg stored and returned energy,
+        a hip steered where the foot came down, and a controller kept the body upright through every bounce. It was
+        pogo-stick simple and profound at once — proof that a machine could have the reflexes of something that's
+        alive, not just the choreography of something that's switched on.
+      </p>
+      <div class="duo">
+        <figure class="tint-mint">
+          <div class="photo"><img src="assets/raibert-2d-hopper.jpg" alt="MIT Leg Lab planar one-leg hopper" width="432" height="309" loading="lazy" decoding="async" /></div>
+          <figcaption><span>Planar One-Leg Hopper</span><span><b>MIT Leg Lab</b></span></figcaption>
+        </figure>
+        <figure class="tint-mint">
+          <div class="photo"><img src="assets/raibert-3d-hopper.jpg" alt="MIT Leg Lab 3D one-leg hopper" width="377" height="526" loading="lazy" decoding="async" /></div>
+          <figcaption><span>3D One-Leg Hopper</span><span><b>MIT Leg Lab</b></span></figcaption>
+        </figure>
+      </div>
+      <p class="note">
+        Photos: <a href="http://www.ai.mit.edu/projects/leglab/robots/robots-main.html" target="_blank" rel="noopener">MIT Leg Laboratory</a>.
+        That line of work — dynamic balance over static stability — became the DNA of modern legged robotics;
+        Raibert later founded <a href="https://en.wikipedia.org/wiki/Marc_Raibert" target="_blank" rel="noopener">Boston Dynamics</a>.
+      </p>
+    </section>
+
+    <!-- 2. Language of movement -->
+    <section class="section">
+      <span class="kicker">The idea spreads</span>
+      <h2>Balance becomes a <em>language</em>.</h2>
+      <p>
+        The hoppers gave the field a vocabulary: spring-loaded legs, body-attitude control, foot-placement to steer
+        momentum. Swap one leg for four and you get a machine that trots over rubble. Swap it for two and you get
+        something that walks, runs, and recovers from a shove. The same few principles, scaled and recombined — a
+        grammar for movement that feels alive.
+      </p>
+      <p>
+        For decades that grammar stayed locked inside national labs and a handful of companies. It took specialized
+        hardware, custom control software, and teams of PhDs. The magic was real — but it was <em>expensive</em>,
+        and almost nobody could get their hands on it.
+      </p>
+    </section>
+
+    <!-- 3. New generation -->
+    <section class="section">
+      <span class="kicker">Today · within reach</span>
+      <h2>Intelligence, now <em>affordable</em>.</h2>
+      <p>
+        Two things changed. First, the movement got <span class="hl">learned</span> instead of hand-coded —
+        reinforcement learning and foundation models let a robot discover how to walk, recover, and react in
+        simulation, then carry that policy into the real world. Second, the hardware got cheap and open.
+      </p>
+      <figure class="tint-yellow">
+        <div class="photo"><img src="assets/microduck.jpg" alt="Microduck bipedal robots by Pollen Robotics" width="1200" height="630" loading="lazy" decoding="async" /></div>
+        <figcaption>
+          <span><b>Microduck</b> — a 25&nbsp;cm RL-trained open-source biped that teaches itself to walk in sim.</span>
+          <span><a href="https://pollen-robotics.com/microduck/" target="_blank" rel="noopener">Pollen Robotics</a></span>
+        </figcaption>
+      </figure>
+      <p>
+        <b>Microduck</b>, the pint-sized open biped from Pollen Robotics (the robotics team at Hugging Face), learns
+        to walk in simulation and runs the policy on-device — for a few hundred dollars. And <b>Unitree</b>'s Go2
+        quadruped and G1 humanoid put Raibert-grade dynamic movement on a desk. The reflexes that once needed a
+        national lab now ship in a box.
+      </p>
+      <div class="duo">
+        <figure class="tint-blue">
+          <div class="photo"><img src="assets/unitree-go2.jpg" alt="Unitree Go2 quadruped robot" width="1054" height="689" loading="lazy" decoding="async" /></div>
+          <figcaption><span><b>Unitree Go2</b> quadruped</span><span><a href="https://commons.wikimedia.org/wiki/File:Unitree_Go2_of_Salvamont_side_view.jpg" target="_blank" rel="noopener">CC BY 3.0</a></span></figcaption>
+        </figure>
+        <figure class="tint-pink">
+          <div class="photo"><img src="assets/unitree-g1.jpg" alt="Unitree G1 humanoid robot" width="1380" height="2326" loading="lazy" decoding="async" /></div>
+          <figcaption><span><b>Unitree G1</b> humanoid</span><span><a href="https://commons.wikimedia.org/wiki/File:Unitree_G1.jpg" target="_blank" rel="noopener">CC0</a></span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- closing vision -->
+    <section class="vision">
+      <span class="kicker">The Game Robotics vision</span>
+      <h2>Physical AI is <em>hard</em>. We bring the pieces together.</h2>
+      <p>
+        Here's the thing nobody tells you: a robot that moves like it's alive is a stack of hard problems balanced
+        on top of each other, all running in real time against unforgiving physics. Miss any one of them and the
+        magic collapses into a pile on the floor.
+      </p>
+      <div class="challenge">
+        <div><b>Perception</b><span>Make sense of a noisy, changing world, fast enough to react.</span></div>
+        <div><b>Control</b><span>Keep balance through contact, slip, and disturbance — every millisecond.</span></div>
+        <div><b>Learning</b><span>Train robust behaviors in sim, then survive the sim-to-real gap.</span></div>
+        <div><b>Hardware</b><span>Actuators, power, and sensors that hold up in the real world.</span></div>
+      </div>
+      <p>
+        The exciting part: <strong>every one of those pieces now exists.</strong> Capable, affordable hardware like
+        Microduck and Unitree. Frontier models and world models. Reinforcement learning and high-fidelity simulation.
+        Open policies shared by a global community. For the first time, the whole toolbox is on the table.
+      </p>
+      <p>
+        What's missing is <strong>integration</strong>. Today those pieces live in separate silos — different tools,
+        different teams, different file formats — and stitching them together is the tax every builder pays before
+        the magic ever shows up.
+      </p>
+      <p>
+        Game Robotics brings them together under <strong>one platform</strong>: hardware, frontier models, and
+        training workflows in a single place where <strong>iteration feels like play</strong>. Sketch an idea, train
+        a behavior, watch it come alive, change your mind, try again. We turn the technical challenges of robotics
+        into a creative, streamlined workflow — for creativity, fast iteration, and robots that <em>actually work</em>.
+      </p>
+      <div class="pillars"><span>Creativity</span><span>Fast iteration</span><span>Working robots</span></div>
+      <a class="cta" href="../">← Back to The Robot Engine</a>
+    </section>
+  </article>
+
+  <footer>
+    © 2026 Game Robotics · Origins of Robotic Lifeforms. Historical photos courtesy the
+    <a href="http://www.ai.mit.edu/projects/leglab/" target="_blank" rel="noopener">MIT Leg Lab</a> and
+    <a href="https://pollen-robotics.com/" target="_blank" rel="noopener">Pollen Robotics</a>; Unitree photos via Wikimedia Commons.
+  </footer>
+</body>
+</html>
