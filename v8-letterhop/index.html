@@ -484,7 +484,10 @@
       // confetti: drops from the top edge of the window and floats down slowly, random sizes
       function confetti() {
         var cols = ['#FF3B6B', '#FFC043', '#35E0A1', '#6E8BFF', '#B07BFF', '#FF7A3D', '#19C3FB'];
-        var groundLine = (window.__titleBox && window.__titleBox.ground) || window.innerHeight;
+        // desktop: confetti ends at the ground line; mobile: let it fall all the way down
+        var groundLine = (window.innerWidth <= 760)
+          ? window.innerHeight
+          : ((window.__titleBox && window.__titleBox.ground) || window.innerHeight);
         for (var n = 0; n < 26; n++) {
           var p = document.createElement('div');
           p.className = 'confetti-p';
