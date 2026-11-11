@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Microduck — live sim (dev)</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0e1518; overflow: hidden; }
+    #app { position: fixed; inset: 0; }
+    #load { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5;
+      color: #bfe6e0; font: 600 15px/1.5 -apple-system, system-ui, sans-serif; background: #0e1518;
+      transition: opacity .5s; text-align: center; }
+    #load.hide { opacity: 0; pointer-events: none; }
+    #load .dim { color: #6b8; font-weight: 400; font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="load">booting the duck…<div class="dim">loading MuJoCo + model</div></div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import { mountDuck } from './duck.js';
+    const load = document.getElementById('load');
+    window.__duck = mountDuck(document.getElementById('app'), {
+      onReady() { load.classList.add('hide'); },
+      onError(e) { load.innerHTML = 'sim error:<div class="dim">' + e + '</div>'; }
+    });
+  </script>
+</body>
+</html>
