@@ -12,7 +12,7 @@
   <style>
     :root {
       --bg:#FFFFFF; --grid:rgba(0,0,0,0.06); --ink:#0A0A0A; --dim:#555; --teal:#0FB5A6;
-      --pink:#FF9FB2; --peach:#FFC487; --yellow:#FFE98A; --mint:#9FE3C5; --blue:#A9C7FF;
+      --pink:#FF9FB2; --peach:#FFC487; --yellow:#FFE98A; --mint:#9FE3C5; --blue:#A9C7FF; --violet:#7338F5;
       --bd:3px;
     }
     * { box-sizing:border-box; margin:0; padding:0; }
@@ -68,6 +68,13 @@
     p { font-size:1.08rem; color:#1c1c1c; margin:0 0 1.1rem; }
     p .hl { background:linear-gradient(180deg,transparent 60%, var(--yellow) 60%); padding:0 .12em; font-weight:600; }
     .note { font-size:.95rem; color:var(--dim); }
+    /* the "aha" bridge into the vision — a brand-new accent so it pops */
+    .bridge { margin:clamp(46px,8vh,88px) 0 clamp(26px,4vh,44px); font-size:clamp(1.32rem,3.4vw,2rem);
+      line-height:1.22; font-weight:800; letter-spacing:-0.012em; color:var(--violet); }
+    .bridge::before { content:""; display:block; width:58px; height:5px; border-radius:3px;
+      background:var(--violet); margin-bottom:20px; }
+    .bridge em { font-style:normal; background:linear-gradient(180deg,transparent 62%, rgba(115,56,245,0.18) 62%); }
+    .bridge + .vision { margin-top:0; }
 
     /* ---- figures / photos ---- */
     figure {
@@ -226,6 +233,8 @@
         </figure>
       </div>
     </section>
+
+    <p class="bridge">Then it clicked: nothing was missing anymore. The hardware, the models, the learning — it all already existed, just scattered across different labs and tools. What no one had built yet was <em>a single place to bring it all together.</em></p>
 
     <!-- closing vision -->
     <section class="vision">

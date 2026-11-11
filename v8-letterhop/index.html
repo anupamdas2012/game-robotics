@@ -44,6 +44,20 @@
       animation: blink 1s steps(1) infinite;
     }
     @keyframes blink { 50% { opacity: 0; } }
+    /* understated bibliography-style link to the article, under the blurb body */
+    .readcite {
+      display: flex; width: fit-content; align-items: center; gap: 7px; margin-top: 16px;
+      padding: 5px 9px 5px 5px; border-radius: 9px;
+      background: rgba(10,10,10,0.05); border: 1px solid rgba(10,10,10,0.09);
+      font-size: 13px; font-weight: 500; line-height: 1.1; letter-spacing: .005em;
+      color: rgba(10,10,10,0.62); text-decoration: none;
+      transition: background .12s, color .12s, border-color .12s, transform .12s;
+    }
+    .readcite:hover { background: rgba(15,181,166,0.12); border-color: rgba(15,181,166,0.45);
+      color: var(--ink); transform: translateY(-1px); }
+    .readcite .num { display: inline-grid; place-items: center; width: 16px; height: 16px;
+      border-radius: 5px; background: var(--teal); color: #fff; font-size: 10px; font-weight: 800; line-height: 1; }
+    .readcite .rc-a { font-size: 12px; opacity: .55; }
     .go-btn {
       display: inline-block; margin-top: 18px;
       background: var(--ink); border-radius: 16px;
@@ -579,7 +593,11 @@
       }
       function revealGo() {
         if (cur.parentNode) el.removeChild(cur);
-        el.appendChild(document.createElement('br'));
+        // understated bibliography-style link right after the blurb body
+        var read = document.createElement('a');
+        read.className = 'readcite'; read.href = 'origins/';
+        read.innerHTML = '<span class="num">1</span>Origins of Robotic Lifeforms<span class="rc-a">↗</span>';
+        el.appendChild(read);
         var a = document.createElement('a');
         a.className = 'go-btn'; a.href = '#';
         for (var k = 0; k < GO.length; k++) {
