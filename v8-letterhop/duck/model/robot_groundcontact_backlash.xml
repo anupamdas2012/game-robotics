@@ -362,44 +362,44 @@
     </body>
   </worldbody>
   <asset>
-    <mesh file="leg.stl"/>
-    <mesh file="yaw_roll_motion.stl"/>
-    <mesh file="face_part.stl"/>
-    <mesh file="upper_leg_rigidity_plate.stl"/>
-    <mesh file="soft_mouth_top.stl"/>
-    <mesh file="right_shell.stl"/>
-    <mesh file="jaw_soft.stl"/>
-    <mesh file="neck.stl"/>
-    <mesh file="foot_right.stl"/>
-    <mesh file="ankle_left.stl"/>
-    <mesh file="trunk_base.stl"/>
-    <mesh file="bearing_roll.stl"/>
-    <mesh file="upper_leg_left.stl"/>
-    <mesh file="neck_pitch.stl"/>
-    <mesh file="noenoeil.stl"/>
-    <mesh file="top_head_shell.stl"/>
-    <mesh file="pcb__raspberry_pi_zero_2_w.stl"/>
-    <mesh file="seeed_bearing__configuration__22x16x4.stl"/>
-    <mesh file="yaw2roll.stl"/>
-    <mesh file="m12_lens_holder.stl"/>
-    <mesh file="speaker.stl"/>
-    <mesh file="bottom_head_shell.stl"/>
-    <mesh file="hip_l.stl"/>
-    <mesh file="elec_rpi_robot_hat_pcb.stl"/>
-    <mesh file="xl330.stl"/>
-    <mesh file="lens.stl"/>
-    <mesh file="seeed_bearing__configuration_default.stl"/>
-    <mesh file="ankle_right.stl"/>
-    <mesh file="jaw.stl"/>
-    <mesh file="np_f970.stl"/>
-    <mesh file="banana_pcb_locker.stl"/>
-    <mesh file="upper_leg_right.stl"/>
-    <mesh file="left_shell.stl"/>
-    <mesh file="foot_left.stl"/>
-    <mesh file="sole_left.stl"/>
-    <mesh file="sole_right.stl"/>
-    <mesh file="power_support.stl"/>
-    <mesh file="motor_support.stl"/>
+    <mesh file="leg.stl" inertia="shell"/>
+    <mesh file="yaw_roll_motion.stl" inertia="shell"/>
+    <mesh file="face_part.stl" inertia="shell"/>
+    <mesh file="upper_leg_rigidity_plate.stl" inertia="shell"/>
+    <mesh file="soft_mouth_top.stl" inertia="shell"/>
+    <mesh file="right_shell.stl" inertia="shell"/>
+    <mesh file="jaw_soft.stl" inertia="shell"/>
+    <mesh file="neck.stl" inertia="shell"/>
+    <mesh file="foot_right.stl" inertia="shell"/>
+    <mesh file="ankle_left.stl" inertia="shell"/>
+    <mesh file="trunk_base.stl" inertia="shell"/>
+    <mesh file="bearing_roll.stl" inertia="shell"/>
+    <mesh file="upper_leg_left.stl" inertia="shell"/>
+    <mesh file="neck_pitch.stl" inertia="shell"/>
+    <mesh file="noenoeil.stl" inertia="shell"/>
+    <mesh file="top_head_shell.stl" inertia="shell"/>
+    <mesh file="pcb__raspberry_pi_zero_2_w.stl" inertia="shell"/>
+    <mesh file="seeed_bearing__configuration__22x16x4.stl" inertia="shell"/>
+    <mesh file="yaw2roll.stl" inertia="shell"/>
+    <mesh file="m12_lens_holder.stl" inertia="shell"/>
+    <mesh file="speaker.stl" inertia="shell"/>
+    <mesh file="bottom_head_shell.stl" inertia="shell"/>
+    <mesh file="hip_l.stl" inertia="shell"/>
+    <mesh file="elec_rpi_robot_hat_pcb.stl" inertia="shell"/>
+    <mesh file="xl330.stl" inertia="shell"/>
+    <mesh file="lens.stl" inertia="shell"/>
+    <mesh file="seeed_bearing__configuration_default.stl" inertia="shell"/>
+    <mesh file="ankle_right.stl" inertia="shell"/>
+    <mesh file="jaw.stl" inertia="shell"/>
+    <mesh file="np_f970.stl" inertia="shell"/>
+    <mesh file="banana_pcb_locker.stl" inertia="shell"/>
+    <mesh file="upper_leg_right.stl" inertia="shell"/>
+    <mesh file="left_shell.stl" inertia="shell"/>
+    <mesh file="foot_left.stl" inertia="shell"/>
+    <mesh file="sole_left.stl" inertia="shell"/>
+    <mesh file="sole_right.stl" inertia="shell"/>
+    <mesh file="power_support.stl" inertia="shell"/>
+    <mesh file="motor_support.stl" inertia="shell"/>
     <material name="seeed_bearing__configuration__22x16x4_material" rgba="0.811765 0.858824 0.898039 1"/>
     <material name="right_shell_material" rgba="0.85098 0.85098 0.839216 1"/>
     <material name="banana_pcb_locker_material" rgba="0.647059 0.647059 0.647059 1"/>

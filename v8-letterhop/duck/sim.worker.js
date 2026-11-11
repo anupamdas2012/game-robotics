@@ -32,12 +32,12 @@ function copy(arr, start, len) { const o = new Float64Array(len); for (let i = 0
 
 async function writeModelFiles() {
   const files = await (await fetch('./model/files.json')).json();
-  for (const f of files) {
-    const buf = new Uint8Array(await (await fetch('./model/' + f)).arrayBuffer());
+  const bufs = await Promise.all(files.map((f) => fetch('./model/' + f).then((r) => r.arrayBuffer())));
+  files.forEach((f, i) => {
     const path = '/m/' + f;
     mj.FS.mkdirTree(path.substring(0, path.lastIndexOf('/')));
-    mj.FS.writeFile(path, buf);
-  }
+    mj.FS.writeFile(path, new Uint8Array(bufs[i]));
+  });
 }
 
 function buildMaps() {
@@ -52,12 +52,13 @@ function buildSpec() {
   // Expand to non-indexed position + normal per face corner, using MuJoCo's own normals
   // (mesh_facenormal -> mesh_normal). MuJoCo computes these with proper smoothing groups, so
   // rounded shells shade smooth and real edges stay crisp — no Three computeVertexNormals facets.
-  const type = model.geom_type, dataid = model.geom_dataid, rgba = model.geom_rgba;
+  const type = model.geom_type, dataid = model.geom_dataid, rgba = model.geom_rgba, group = model.geom_group;
   const vadrM = model.mesh_vertadr, fadrM = model.mesh_faceadr, fnum = model.mesh_facenum, nadrM = model.mesh_normaladr;
   const mvert = model.mesh_vert, mface = model.mesh_face, mnorm = model.mesh_normal, mfn = model.mesh_facenormal;
   const geoms = []; order = [];
   for (let g = 0; g < ngeom; g++) {
     if (type[g] !== MESH) continue;
+    if (group[g] === 3) continue;                 // skip collision duplicates (group 3)
     const did = dataid[g]; if (did < 0) continue;
     const fn = fnum[did], va = vadrM[did], fa = fadrM[did], na = nadrM[did];
     const pos = new Float32Array(fn * 9), nor = new Float32Array(fn * 9);
