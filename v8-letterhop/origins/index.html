@@ -69,14 +69,21 @@
     p .hl { background:linear-gradient(180deg,transparent 60%, var(--yellow) 60%); padding:0 .12em; font-weight:600; }
     .note { font-size:.95rem; color:var(--dim); }
     /* the "aha" bridge into the vision — a brand-new accent so it pops */
-    .bridge { margin:clamp(46px,8vh,88px) 0 clamp(26px,4vh,44px);
-      font-size:clamp(1.12rem,2.3vw,1.42rem); line-height:1.4; font-weight:500; color:var(--ink); }
-    .bridge-lead { display:block; font-family:'Archivo Black',sans-serif; font-weight:400;
-      font-size:clamp(2.1rem,6vw,3.3rem); line-height:1.0; letter-spacing:-0.015em;
-      color:var(--teal); margin-bottom:.5rem; }
-    .bridge em { font-style:normal; font-weight:700;
+    .bridge { margin:clamp(46px,8vh,88px) 0 clamp(26px,4vh,44px); }
+    .bulb { display:block; width:clamp(74px,11vw,108px); margin:0 0 1.15rem; }
+    .bulb svg { width:100%; height:auto; overflow:visible; display:block;
+      filter:drop-shadow(0 4px 10px rgba(244,164,0,0.35)); animation:bulbFloat 3.2s ease-in-out infinite; }
+    .bulb .glow, .bulb .rays { transform-box:fill-box; transform-origin:center; }
+    .bulb .glow { animation:bulbGlow 2.1s ease-in-out infinite; }
+    .bulb .rays { animation:bulbRays 2.1s ease-in-out infinite; }
+    @keyframes bulbGlow { 0%,100%{opacity:.3;transform:scale(1);} 50%{opacity:.85;transform:scale(1.25);} }
+    @keyframes bulbRays { 0%,100%{opacity:.35;transform:scale(.88);} 50%{opacity:1;transform:scale(1.1);} }
+    @keyframes bulbFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+    .bridge-body { font-size:clamp(1.12rem,2.3vw,1.42rem); line-height:1.42; font-weight:500; color:var(--ink); }
+    .bridge-body em { font-style:normal; font-weight:700; color:var(--teal);
       background:linear-gradient(180deg,transparent 62%, rgba(15,181,166,0.22) 62%); }
     .bridge + .vision { margin-top:0; }
+    @media (prefers-reduced-motion: reduce) { .bulb svg, .bulb .glow, .bulb .rays { animation:none; } }
 
     /* ---- figures / photos ---- */
     figure {
@@ -236,7 +243,26 @@
       </div>
     </section>
 
-    <p class="bridge"><span class="bridge-lead">Then it clicked!</span> Robots aren't just 'cool' — they're the embodiment of intelligence, the way we harness AI to push upon the real world, like we do. The challenges are still hard, so we need to encourage more building, more experimentation <em>for everyone, not just a select few.</em> And all the pieces are there to make that happen.</p>
+    <div class="bridge">
+      <span class="bulb" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <g class="rays" stroke="#F4A400" stroke-width="5" stroke-linecap="round">
+            <line x1="60" y1="22" x2="60" y2="8" />
+            <line x1="40" y1="30" x2="31" y2="17" />
+            <line x1="80" y1="30" x2="89" y2="17" />
+            <line x1="30" y1="46" x2="16" y2="41" />
+            <line x1="90" y1="46" x2="104" y2="41" />
+          </g>
+          <circle class="glow" cx="60" cy="52" r="33" fill="#FFDD66" />
+          <circle cx="60" cy="52" r="24" fill="#FFE98A" stroke="#0A0A0A" stroke-width="4" />
+          <path d="M54 58 q1 -13 6 -13 t6 13" fill="none" stroke="#0A0A0A" stroke-width="3" stroke-linecap="round" />
+          <rect x="50" y="74" width="20" height="8" rx="2" fill="#0A0A0A" />
+          <rect x="53" y="83" width="14" height="6" rx="2" fill="#0A0A0A" />
+          <rect x="55" y="90" width="10" height="5" rx="2.5" fill="#0A0A0A" />
+        </svg>
+      </span>
+      <p class="bridge-body">The embodiment of intelligence is the way we harness AI to push upon the real world, like humans do. When that happens, it will open a new industry of robots among us. But to get there, we need to encourage more building and more experimentation — <em>for everyone</em>, not just well-funded labs or PhD-level researchers — to build the robots of the future.</p>
+    </div>
 
     <!-- closing vision -->
     <section class="vision">
