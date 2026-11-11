@@ -162,7 +162,7 @@
     var world = engine.world;
     var WORDS = ['THE', 'ROBOT', 'ENGINE'];
     // the third line cycles through these on a loop, with a per-letter scramble on each change
-    var CYCLE = ['ENGINE', 'TOOLKIT', 'TESTBED', 'NETWORK'];
+    var CYCLE = ['ENGINE', 'MAKERS', 'FUTURE'];
     var cycIdx = 0, cycPhase = 'hold', cycT0 = 0, cycInit = false;
     var cycSlots = [], cycX = [];        // per-slot {final,cur,lockAt,lastTick}; per-slot x
     var HOLD_MS = 3000, SCRAMBLE_MS = 760;
@@ -194,9 +194,7 @@
       var fitWords = ['THE', 'ROBOT'].concat(CYCLE);   // fit the font so every cycle word fits
       for (var k = 0; k < fitWords.length; k++) maxWordW = Math.max(maxWordW, ctx.measureText(fitWords[k]).width);
       var padX = Math.max(22, Math.round(W * 0.05));
-      // on desktop, reserve room on the right for the blurb so the wider cycle words don't crowd it out
-      var blurbReserve = (W > 760) ? 300 : 0;
-      var fsByW = probe * (W - padX * 2 - blurbReserve) / maxWordW;
+      var fsByW = probe * (W - padX * 2) / maxWordW;
       var fsByH = (H * 0.86) / (2 * 0.70 + 0.72);   // flush stack: 2 line-gaps + 1 cap-height
       fontPx = Math.min(fsByW, fsByH, 240);
       ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
