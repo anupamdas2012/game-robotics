@@ -49,30 +49,27 @@ function buildMaps() {
 }
 
 function buildSpec() {
-  // Expand to non-indexed position + normal per face corner, using MuJoCo's own normals
-  // (mesh_facenormal -> mesh_normal). MuJoCo computes these with proper smoothing groups, so
-  // rounded shells shade smooth and real edges stay crisp — no Three computeVertexNormals facets.
+  // Non-indexed position per face corner. The renderer re-derives normals with a crease angle
+  // (toCreasedNormals): gentle curves (servos, shells) shade smooth, real edges stay sharp.
   const type = model.geom_type, dataid = model.geom_dataid, rgba = model.geom_rgba, group = model.geom_group;
-  const vadrM = model.mesh_vertadr, fadrM = model.mesh_faceadr, fnum = model.mesh_facenum, nadrM = model.mesh_normaladr;
-  const mvert = model.mesh_vert, mface = model.mesh_face, mnorm = model.mesh_normal, mfn = model.mesh_facenormal;
+  const vadrM = model.mesh_vertadr, fadrM = model.mesh_faceadr, fnum = model.mesh_facenum;
+  const mvert = model.mesh_vert, mface = model.mesh_face;
   const geoms = []; order = [];
   for (let g = 0; g < ngeom; g++) {
     if (type[g] !== MESH) continue;
     if (group[g] === 3) continue;                 // skip collision duplicates (group 3)
     const did = dataid[g]; if (did < 0) continue;
-    const fn = fnum[did], va = vadrM[did], fa = fadrM[did], na = nadrM[did];
-    const pos = new Float32Array(fn * 9), nor = new Float32Array(fn * 9);
+    const fn = fnum[did], va = vadrM[did], fa = fadrM[did];
+    const pos = new Float32Array(fn * 9);
     let p = 0;
     for (let f = 0; f < fn; f++) {
       for (let c = 0; c < 3; c++) {
-        const k = (fa + f) * 3 + c;
-        const vb = (va + mface[k]) * 3, nb = (na + mfn[k]) * 3;
+        const vb = (va + mface[(fa + f) * 3 + c]) * 3;
         pos[p] = mvert[vb]; pos[p + 1] = mvert[vb + 1]; pos[p + 2] = mvert[vb + 2];
-        nor[p] = mnorm[nb]; nor[p + 1] = mnorm[nb + 1]; nor[p + 2] = mnorm[nb + 2];
         p += 3;
       }
     }
-    geoms.push({ pos, nor, rgba: [rgba[4 * g], rgba[4 * g + 1], rgba[4 * g + 2], rgba[4 * g + 3]] });
+    geoms.push({ pos, rgba: [rgba[4 * g], rgba[4 * g + 1], rgba[4 * g + 2], rgba[4 * g + 3]] });
     order.push(g);
   }
   return geoms;
@@ -158,7 +155,7 @@ self.onmessage = async (ev) => {
       session = await ort.InferenceSession.create(onnx, { executionProviders: ['wasm'] });
       inName = session.inputNames[0]; outName = session.outputNames[0];
       const geoms = buildSpec();
-      const transfer = []; for (const g of geoms) transfer.push(g.pos.buffer, g.nor.buffer);
+      const transfer = []; for (const g of geoms) transfer.push(g.pos.buffer);
       postMessage({ type: 'ready', geoms }, transfer);
       running = true; last = 0; loop();
     } catch (e) {
