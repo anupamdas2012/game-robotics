@@ -161,6 +161,11 @@
 
     var world = engine.world;
     var WORDS = ['THE', 'ROBOT', 'ENGINE'];
+    // the third line cycles through these on a loop, with a per-letter scramble on each change
+    var CYCLE = ['ENGINE', 'TOOLKIT', 'TESTBED', 'NETWORK'];
+    var cycIdx = 0, cycPhase = 'hold', cycT0 = 0, cycInit = false;
+    var cycSlots = [], cycX = [];        // per-slot {final,cur,lockAt,lastTick}; per-slot x
+    var HOLD_MS = 3000, SCRAMBLE_MS = 760;
     var lines = [];       // {ch, x, y, w} per stacked word, in css px
     var fontPx = 120;
     var baselineY = 0, capTopY = 0, groundY = 0, capH = 0, textLeft = 0, textRight = 0;
@@ -186,9 +191,12 @@
       var probe = 200;
       ctx.font = '400 ' + probe + 'px "Archivo Black"';
       var maxWordW = 0;
-      for (var k = 0; k < WORDS.length; k++) maxWordW = Math.max(maxWordW, ctx.measureText(WORDS[k]).width);
+      var fitWords = ['THE', 'ROBOT'].concat(CYCLE);   // fit the font so every cycle word fits
+      for (var k = 0; k < fitWords.length; k++) maxWordW = Math.max(maxWordW, ctx.measureText(fitWords[k]).width);
       var padX = Math.max(22, Math.round(W * 0.05));
-      var fsByW = probe * (W - padX * 2) / maxWordW;
+      // on desktop, reserve room on the right for the blurb so the wider cycle words don't crowd it out
+      var blurbReserve = (W > 760) ? 300 : 0;
+      var fsByW = probe * (W - padX * 2 - blurbReserve) / maxWordW;
       var fsByH = (H * 0.86) / (2 * 0.70 + 0.72);   // flush stack: 2 line-gaps + 1 cap-height
       fontPx = Math.min(fsByW, fsByH, 240);
       ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
@@ -210,6 +218,7 @@
         lines.push({ ch: WORDS[j], x: padX + lb, y: topBaseline + j * lineGap, w: m.width });
         if (m.width > maxW2) maxW2 = m.width;
       }
+      for (var cw = 0; cw < CYCLE.length; cw++) maxW2 = Math.max(maxW2, ctx.measureText(CYCLE[cw]).width);
       textRight = padX + maxW2;
       groundY = lines[lines.length - 1].y;           // collision floor at the base of ENGINE
       capTopY = topBaseline - capH;
@@ -218,7 +227,66 @@
       window.__titleBox = { top: capTopY, robotTop: lines[1].y - capH, ground: groundY, right: textRight, W: W };
       window.dispatchEvent(new Event('titlebox'));
 
+      cycleRelayout();
       rebuildWorld();
+    }
+
+    // ----- third line cycles ENGINE -> TOOLKIT -> TESTBED -> NETWORK on a loop,
+    //       with a randomized per-letter scramble on each change -----
+    function cycRand() { return String.fromCharCode(65 + (Math.random() * 26 | 0)); }
+
+    function cycleRelayout() {
+      ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
+      var word = CYCLE[cycIdx];
+      var lb = ctx.measureText(word).actualBoundingBoxLeft || 0;   // align ink left edge to padX
+      cycX = [];
+      for (var i = 0; i < word.length; i++) cycX.push(textLeft + lb + ctx.measureText(word.substring(0, i)).width);
+      if (!cycInit) {
+        cycInit = true; cycPhase = 'hold';
+        cycT0 = (window.performance && performance.now ? performance.now() : Date.now());
+        cycSlots = [];
+        for (var j = 0; j < word.length; j++) cycSlots.push({ final: word[j], cur: word[j], lockAt: 0, lastTick: 0 });
+      }
+    }
+
+    function cycStartScramble(now) {
+      cycIdx = (cycIdx + 1) % CYCLE.length;
+      cycleRelayout();
+      var word = CYCLE[cycIdx];
+      cycSlots = [];
+      for (var i = 0; i < word.length; i++) {
+        cycSlots.push({
+          final: word[i], cur: cycRand(), lastTick: now,
+          lockAt: SCRAMBLE_MS * (0.42 + 0.58 * (i + Math.random()) / word.length)
+        });
+      }
+      cycPhase = 'scramble'; cycT0 = now;
+    }
+
+    function cycUpdate(now) {
+      if (!cycInit) return;
+      if (cycPhase === 'hold') {
+        if (now - cycT0 >= HOLD_MS) cycStartScramble(now);
+        return;
+      }
+      var t = now - cycT0, allLocked = true;
+      for (var i = 0; i < cycSlots.length; i++) {
+        var s = cycSlots[i];
+        if (t >= s.lockAt) { s.cur = s.final; }
+        else { allLocked = false; if (now - s.lastTick >= 45) { s.cur = cycRand(); s.lastTick = now; } }
+      }
+      if (t >= SCRAMBLE_MS || allLocked) { cycPhase = 'hold'; cycT0 = now; }
+    }
+
+    function drawThirdWord(now) {
+      cycUpdate(now);
+      ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
+      ctx.shadowColor = 'transparent'; ctx.fillStyle = INK;
+      var y = lines[2] ? lines[2].y : groundY;
+      for (var i = 0; i < cycSlots.length; i++) {
+        var ch = cycSlots[i].cur;
+        if (ch && ch !== ' ' && cycX[i] != null) ctx.fillText(ch, cycX[i], y);
+      }
     }
 
     function rebuildWorld() {
@@ -351,6 +419,7 @@
       // letters
       ctx.font = '400 ' + fontPx + 'px "Archivo Black"';
       ctx.textBaseline = 'alphabetic';
+      var tms = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       for (var i = 0; i < lines.length; i++) {
         if (i === 1) {
           // ROBOT: each letter a different pastel color with a bold black outline
@@ -358,7 +427,6 @@
           ctx.lineJoin = 'round';
           ctx.lineWidth = fontPx * 0.035;
           var ox = ctx.lineWidth / 2;    // visible outline -> align the OUTLINE edge to padX
-          var tms = (typeof performance !== 'undefined' ? performance.now() : Date.now());
           for (var ci = 0; ci < word.length; ci++) {
             var cx = lines[i].x + ox + ctx.measureText(word.substring(0, ci)).width;
             var L = 50 + 50 * Math.sin((tms * 0.0016) + ci * 0.9);
@@ -371,6 +439,8 @@
             ctx.fillStyle = PASTELS[ci % PASTELS.length]; ctx.fillText(word[ci], cx, lines[i].y);
           }
           ctx.shadowColor = 'transparent';
+        } else if (i === 2) {
+          drawThirdWord(tms);
         } else {
           ctx.fillStyle = INK;
           ctx.fillText(lines[i].ch, lines[i].x, lines[i].y);
