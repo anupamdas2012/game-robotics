@@ -107,12 +107,15 @@
     .tint-blue .photo{background:linear-gradient(180deg,#fff,#eef3ff);}
     @media (max-width:620px){ .duo{grid-template-columns:1fr;} }
 
-    /* ---- the challenge grid ---- */
-    .challenge { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:1.6rem 0; }
-    .challenge div { border:2px solid var(--ink); border-radius:12px; padding:.9rem 1rem; background:#fff; }
-    .challenge b { font-family:'Archivo Black',sans-serif; font-weight:400; font-size:.8rem;
-      letter-spacing:.02em; display:block; margin-bottom:.2rem; }
-    .challenge span { font-size:.92rem; color:var(--dim); }
+    /* ---- the challenge grid (inside the dark vision panel) ---- */
+    .challenge { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:1.9rem 0; }
+    .challenge div { background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.14);
+      border-radius:14px; padding:1.05rem 1.15rem 1.1rem; }
+    .challenge b { display:flex; align-items:center; gap:.55rem;
+      font-family:'Archivo Black',sans-serif; font-weight:400; font-size:.82rem;
+      letter-spacing:.06em; text-transform:uppercase; color:#fff; margin-bottom:.5rem; }
+    .challenge b::before { content:""; width:9px; height:9px; border-radius:2px; background:var(--teal); flex:none; }
+    .challenge span { display:block; font-size:.93rem; line-height:1.5; color:#b4b4b8; }
     @media (max-width:560px){ .challenge{grid-template-columns:1fr;} }
 
     /* ---- closing vision ---- */
