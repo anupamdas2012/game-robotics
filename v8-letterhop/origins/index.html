@@ -69,11 +69,13 @@
     p .hl { background:linear-gradient(180deg,transparent 60%, var(--yellow) 60%); padding:0 .12em; font-weight:600; }
     .note { font-size:.95rem; color:var(--dim); }
     /* the "aha" bridge into the vision — a brand-new accent so it pops */
-    .bridge { margin:clamp(46px,8vh,88px) 0 clamp(26px,4vh,44px); font-size:clamp(1.32rem,3.4vw,2rem);
-      line-height:1.22; font-weight:800; letter-spacing:-0.012em; color:var(--violet); }
-    .bridge::before { content:""; display:block; width:58px; height:5px; border-radius:3px;
-      background:var(--violet); margin-bottom:20px; }
-    .bridge em { font-style:normal; background:linear-gradient(180deg,transparent 62%, rgba(115,56,245,0.18) 62%); }
+    .bridge { margin:clamp(46px,8vh,88px) 0 clamp(26px,4vh,44px);
+      font-size:clamp(1.12rem,2.3vw,1.42rem); line-height:1.4; font-weight:500; color:var(--ink); }
+    .bridge-lead { display:block; font-family:'Archivo Black',sans-serif; font-weight:400;
+      font-size:clamp(2.1rem,6vw,3.3rem); line-height:1.0; letter-spacing:-0.015em;
+      color:var(--teal); margin-bottom:.5rem; }
+    .bridge em { font-style:normal; font-weight:700;
+      background:linear-gradient(180deg,transparent 62%, rgba(15,181,166,0.22) 62%); }
     .bridge + .vision { margin-top:0; }
 
     /* ---- figures / photos ---- */
@@ -234,7 +236,7 @@
       </div>
     </section>
 
-    <p class="bridge">Then it clicked: nothing was missing anymore. The hardware, the models, the learning — it all already existed, just scattered across different labs and tools. What no one had built yet was <em>a single place to bring it all together.</em></p>
+    <p class="bridge"><span class="bridge-lead">Then it clicked!</span> Robots aren't just 'cool' — they're the embodiment of intelligence, the way we harness AI to push upon the real world, like we do. The challenges are still hard, so we need to encourage more building, more experimentation <em>for everyone, not just a select few.</em> And all the pieces are there to make that happen.</p>
 
     <!-- closing vision -->
     <section class="vision">
