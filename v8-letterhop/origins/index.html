@@ -153,11 +153,9 @@
 
   <article class="wrap">
     <p style="font-size:1.18rem;">
-      There's a particular kind of magic the first time a machine catches itself. Not a programmed pose or a
-      scripted walk — a <span class="hl">reflex</span>. A stumble, corrected. A hop, landed. For a moment it stops
-      looking like a mechanism and starts looking like something <em>alive</em>. That flicker — intelligence meeting
-      lifelike movement — is what everyone building robots is really chasing. This is the short story of where it
-      began, and what it takes to get there.
+      There's a particular magic the first time a machine catches itself — a stumble corrected, a <span class="hl">hop
+      landed</span>. For a moment it stops looking like a mechanism and starts looking <em>alive</em>. That flicker —
+      intelligence meeting lifelike movement — is what every roboticist is chasing. Here's where it began.
     </p>
 
     <!-- 1. Raibert -->
@@ -165,15 +163,10 @@
       <span class="kicker">The first hops · 1980s</span>
       <h2>A machine learns to <em>balance</em>.</h2>
       <p>
-        In 1980, <b>Marc Raibert</b> founded the <b>MIT Leg Laboratory</b>. While most robots of the era crept
-        along in careful, statically-stable poses — always keeping their center of mass over their feet — Raibert's
-        machines did the opposite. They <span class="hl">fell, and caught themselves</span>.
-      </p>
-      <p>
-        His hopping robots balanced the way living things do: dynamically. A springy leg stored and returned energy,
-        a hip steered where the foot came down, and a controller kept the body upright through every bounce. It was
-        pogo-stick simple and profound at once — proof that a machine could have the reflexes of something that's
-        alive, not just the choreography of something that's switched on.
+        In 1980, <b>Marc Raibert</b> founded the <b>MIT Leg Lab</b>. While other robots crept along carefully keeping
+        their balance, his hopping machines did the opposite — they <span class="hl">fell and caught themselves</span>,
+        balancing dynamically the way living things do. Pogo-stick simple, and the first proof that a machine could
+        have reflexes, not just choreography.
       </p>
       <div class="duo">
         <figure class="tint-mint">
@@ -186,9 +179,9 @@
         </figure>
       </div>
       <p class="note">
-        Photos: <a href="http://www.ai.mit.edu/projects/leglab/robots/robots-main.html" target="_blank" rel="noopener">MIT Leg Laboratory</a>.
-        That line of work — dynamic balance over static stability — became the DNA of modern legged robotics;
-        Raibert later founded <a href="https://en.wikipedia.org/wiki/Marc_Raibert" target="_blank" rel="noopener">Boston Dynamics</a>.
+        Photos: <a href="http://www.ai.mit.edu/projects/leglab/robots/robots-main.html" target="_blank" rel="noopener">MIT Leg Lab</a>.
+        Dynamic balance became the DNA of modern legged robots; Raibert went on to found
+        <a href="https://en.wikipedia.org/wiki/Marc_Raibert" target="_blank" rel="noopener">Boston Dynamics</a>.
       </p>
     </section>
 
@@ -197,15 +190,9 @@
       <span class="kicker">The idea spreads</span>
       <h2>Balance becomes a <em>language</em>.</h2>
       <p>
-        The hoppers gave the field a vocabulary: spring-loaded legs, body-attitude control, foot-placement to steer
-        momentum. Swap one leg for four and you get a machine that trots over rubble. Swap it for two and you get
-        something that walks, runs, and recovers from a shove. The same few principles, scaled and recombined — a
-        grammar for movement that feels alive.
-      </p>
-      <p>
-        For decades that grammar stayed locked inside national labs and a handful of companies. <strong>It took specialized
-        hardware, custom control software, and teams of PhDs. The magic was real — but it was <em>expensive</em>,
-        and almost nobody could get their hands on it.</strong>
+        Those principles — spring legs, body balance, foot placement — became the grammar of every legged robot
+        since. <strong>But for decades it stayed locked inside national labs and a few companies: specialized hardware,
+        custom control stacks, teams of PhDs. The magic was real — but almost nobody could get their hands on it.</strong>
       </p>
     </section>
 
@@ -214,9 +201,8 @@
       <span class="kicker">Today · within reach</span>
       <h2>Intelligence, now <em>affordable</em>.</h2>
       <p>
-        Two things changed. First, the movement got <span class="hl">learned</span> instead of hand-coded —
-        reinforcement learning and foundation models let a robot discover how to walk, recover, and react in
-        simulation, then carry that policy into the real world. Second, the hardware got cheap and open.
+        Then two things changed: movement became <span class="hl">learned</span> instead of hand-coded — trained in
+        simulation with reinforcement learning — and the hardware got cheap and open.
       </p>
       <figure class="tint-yellow">
         <div class="photo"><img src="assets/microduck.jpg" alt="Microduck bipedal robots by Pollen Robotics" width="1200" height="630" loading="lazy" decoding="async" /></div>
@@ -226,10 +212,15 @@
         </figcaption>
       </figure>
       <p>
-        <b>Microduck</b>, the pint-sized open biped from Pollen Robotics (the robotics team at Hugging Face), learns
-        to walk in simulation and runs the policy on-device — for a few hundred dollars. And <b>Unitree</b>'s Go2
-        quadruped and G1 humanoid bring Raibert-grade dynamic movement to the mainstream. The reflexes that once needed a
-        national lab now ship in a box.
+        Look no further than <b>Microduck</b> — a 25&nbsp;cm open-source biped from Pollen Robotics (Hugging Face's
+        robotics team) that teaches itself to walk in sim and runs on-device for a few hundred dollars. When it
+        dropped, it <span class="hl">struck a nerve</span>: a waddling little duck that lit up robotics timelines
+        everywhere. That reaction is the real signal — people are hungry to build this, and the barrier to entry just
+        fell through the floor.
+      </p>
+      <p>
+        And at the other end of the range, <b>Unitree</b>'s Go2 and G1 put Raibert-grade movement on a desk. The
+        reflexes that once needed a national lab now ship in a box.
       </p>
       <div class="duo">
         <figure class="tint-blue">
