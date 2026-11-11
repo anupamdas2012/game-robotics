@@ -70,9 +70,8 @@ export function mountDuck(container, opts = {}) {
     if (m.type === 'ready') {
       for (const g of m.geoms) {
         const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(g.verts, 3));
-        geo.setIndex(new THREE.BufferAttribute(g.faces, 1));
-        geo.computeVertexNormals();
+        geo.setAttribute('position', new THREE.BufferAttribute(g.pos, 3));
+        geo.setAttribute('normal', new THREE.BufferAttribute(g.nor, 3));   // MuJoCo's own normals
         const c = g.rgba;
         const useDefault = (c[0] <= 0.02 && c[1] <= 0.02 && c[2] <= 0.02) || c[3] === 0;
         const color = useDefault ? DUCK_YELLOW : new THREE.Color(c[0], c[1], c[2]).getHex();
